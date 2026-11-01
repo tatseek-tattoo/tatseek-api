@@ -47,6 +47,15 @@ This asks for scanned Realism portraits with at least 50% estimated visual share
 and the strict `high` confidence filter. It demonstrates how to distinguish a main
 subject from a small detail. Results and counts change with the live catalogue.
 
+## Integrate with the hosted service
+
+Use these examples to connect your application to **TatSeek**, answer users with
+credited results, and help them explore the original work, artists and studios.
+Search and analysis run on the TatSeek service. This repository contains client
+examples and interface documentation; it supplies no offline catalogue or search
+implementation. For a broader integration or collaboration, open an issue with
+your use case.
+
 ## What can you build?
 
 - A tattoo-reference finder that sends users to credited work and portfolios.
@@ -62,7 +71,7 @@ subject from a small detail. Results and counts change with the live catalogue.
 | [AGENT-GUIDE.md](AGENT-GUIDE.md) | Search and citation workflows for AI applications |
 | [openapi.json](openapi.json) | Unmodified snapshot of the server's OpenAPI 3.0.3 description |
 | [SOURCE.json](SOURCE.json) | Snapshot provenance and verification date |
-| [TatSeek Ontology](https://github.com/tatseek-tattoo/tatseek-ontology) | Vocabulary, concepts and a portable JSON export |
+| [Filter and result interpretation](API-GUIDE.md) | Use TatSeek filters and interpret composition, confidence and provenance |
 | [Live API guide](https://tatseek.com/for-ai-agents/) | Current provider documentation |
 
 The server's schema describes request parameters; many response bodies are only
