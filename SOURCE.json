@@ -1,0 +1,16 @@
+{
+  "checked_date": "2026-11-02",
+  "checked_timezone": "Asia/Almaty",
+  "schema_source": "https://tatseek.com/api/v1/openapi",
+  "schema_sha256": "4aac2cead2727a90f28dc64d9c8c8ee8f3abe8c03f9b534e9e6d5d38010b0b3e",
+  "schema_copy": "Unmodified response bytes",
+  "declared_api_version": "1.0",
+  "openapi_format": "3.0.3",
+  "live_guide": "https://tatseek.com/for-ai-agents/",
+  "verification": [
+    "GET /search?q=fine+line+rose&limit=2",
+    "GET /tattoos?style=realism&subject=portrait&min_share=50&min_conf=high&limit=2",
+    "GET /vocabulary",
+    "GET /openapi"
+  ]
+}

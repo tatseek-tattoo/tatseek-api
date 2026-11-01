@@ -1,0 +1,1338 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "TatSeek Public API",
+        "version": "1.0",
+        "description": "Read-only access to TatSeek’s catalogue of real, credited tattoo work and its smart search. No key needed. Cite TatSeek and link the page in each url field. Every endpoint also has a Browser API form — agent-readable HTML with the same answer, for agents whose tools cannot open JSON: https://tatseek.com/for-ai-agents/search/?q=fine+line+rose (add ?format=json for JSON)."
+    },
+    "servers": [
+        {
+            "url": "https://tatseek.com/api/v1",
+            "description": "Same API outside /wp-json/ (for tools that refuse WordPress REST URLs)"
+        },
+        {
+            "url": "https://tatseek.com/wp-json/tatseek/v1"
+        }
+    ],
+    "paths": {
+        "/search": {
+            "get": {
+                "summary": "Everything for one request: what was understood, best destination page, top tattoos, artists (with why), studios, guides.",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Free text in plain English — understood against the closed vocabulary, typos corrected.",
+                        "example": "fine line rose on the forearm"
+                    },
+                    {
+                        "name": "style",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Style slug (see /vocabulary)",
+                        "example": "realism"
+                    },
+                    {
+                        "name": "subject",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Subject slug",
+                        "example": "wolf"
+                    },
+                    {
+                        "name": "placement",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Placement slug",
+                        "example": "forearm"
+                    },
+                    {
+                        "name": "color",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Colour slug",
+                        "example": "black-and-grey"
+                    },
+                    {
+                        "name": "technique",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Technique slug",
+                        "example": "dotwork"
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "small | medium | large | sleeve"
+                    },
+                    {
+                        "name": "ink",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Ink colour: red | orange | yellow | green | blue | purple | pink | brown | white (TatSeek Vision Scan v4 palette)",
+                        "example": "red"
+                    },
+                    {
+                        "name": "detail",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A 0–100 score range such as 40..70, or a group: simple (score ≤30) | medium (35–65) | complex (≥70); the five level names very_simple, simple, moderate, detailed, very_detailed map onto those groups. Detail score is labour per cm², independent of size.",
+                        "example": "40..70"
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "City slug",
+                        "example": "seattle"
+                    },
+                    {
+                        "name": "country",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Country slug or ISO code",
+                        "example": "united-states"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Max items"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Skip items"
+                    },
+                    {
+                        "name": "min_share",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Only tattoos where each requested style/subject takes at least this share (0–100) of the picture, by TatSeek’s composition estimate (estimated_visual_share). Tattoos without a composition are left out when this is used.",
+                        "example": "60"
+                    },
+                    {
+                        "name": "min_conf",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "With min_share: minimum confidence of that estimate — sure (the API prints high and medium as sure), likely (any) or high (strictest).",
+                        "example": "sure"
+                    },
+                    {
+                        "name": "healed",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = only tattoos photographed healed (set only with evidence)",
+                        "example": "1"
+                    },
+                    {
+                        "name": "coverup",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = only cover-ups of an older tattoo or scar",
+                        "example": "1"
+                    },
+                    {
+                        "name": "mood",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Mood slug: cute, funny, romantic, delicate (shown as Tender), peaceful, spiritual, dark, fierce, melancholic (see /vocabulary); tender works too",
+                        "example": "dark"
+                    },
+                    {
+                        "name": "structure",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Vision Scan 4.4: how the ink is laid — solid | shaded | line | lettering | scattered (scanned photos; older ones derived from fill, line and lettering)",
+                        "example": "line"
+                    },
+                    {
+                        "name": "coverage",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Large-format kind — band | spine_piece | half_sleeve | full_sleeve | back_piece | chest_piece | patchwork | full_body",
+                        "example": "full_sleeve"
+                    },
+                    {
+                        "name": "look",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Visual weight of the design — very_delicate | delicate | medium | heavy | very_heavy (delicate includes very_delicate, heavy includes very_heavy), or a 0–100 score range such as 0..40. Never about the wearer.",
+                        "example": "delicate"
+                    },
+                    {
+                        "name": "density",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "How much is going on — minimal | sparse | moderate | dense | very_dense (sparse includes minimal, dense includes very_dense), or a 0–100 range",
+                        "example": "sparse"
+                    },
+                    {
+                        "name": "colourful",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Share of colour ink — none | accents | partial | mostly | full, or a 0–100 range (photos with a scanned palette)",
+                        "example": "accents"
+                    },
+                    {
+                        "name": "realism",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "How realistic the rendering is — graphic | stylised | illustrative | realistic | photoreal, or a 0–100 range (Vision Scan 4.4 re-scans only; empty until then)",
+                        "example": "realistic"
+                    },
+                    {
+                        "name": "effect",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Imitated medium — sticker | embroidery | stained_glass | glitch",
+                        "example": "sticker"
+                    },
+                    {
+                        "name": "intent",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "memorial | matching — only from what the tattoo shows or the artist says; memorial_ideas = motifs often chosen for a memorial piece",
+                        "example": "memorial"
+                    },
+                    {
+                        "name": "one_sitting",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = estimated to fit one session (up to 6 hours)",
+                        "example": "1"
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Language of the lettering (es, la, fr, it, de, pt, he, ar, el, ru, hi, sa, ko, zh, ja, en)",
+                        "example": "la"
+                    },
+                    {
+                        "name": "entity",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A depicted character, person, place or artwork: its Wikidata id (Q366957 = Jason Voorhees) as given in entities[].wikidata_id; tattoos_url there is the same list on the site",
+                        "example": "Q366957"
+                    },
+                    {
+                        "name": "made_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "photo | design | any — only tattoos published next to the reference they were made from",
+                        "example": "photo"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON"
+                    }
+                }
+            }
+        },
+        "/tattoos": {
+            "get": {
+                "summary": "Tattoo photos matching free text and/or exact filters, best match first. id= returns one photo (the agent-readable version of a photo page). Each tattoo has main_subject and main_style (the lead element of its composition).",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Free text in plain English — understood against the closed vocabulary, typos corrected.",
+                        "example": "fine line rose on the forearm"
+                    },
+                    {
+                        "name": "style",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Style slug (see /vocabulary)",
+                        "example": "realism"
+                    },
+                    {
+                        "name": "subject",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Subject slug",
+                        "example": "wolf"
+                    },
+                    {
+                        "name": "placement",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Placement slug",
+                        "example": "forearm"
+                    },
+                    {
+                        "name": "color",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Colour slug",
+                        "example": "black-and-grey"
+                    },
+                    {
+                        "name": "technique",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Technique slug",
+                        "example": "dotwork"
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "small | medium | large | sleeve"
+                    },
+                    {
+                        "name": "ink",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Ink colour: red | orange | yellow | green | blue | purple | pink | brown | white (TatSeek Vision Scan v4 palette)",
+                        "example": "red"
+                    },
+                    {
+                        "name": "detail",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A 0–100 score range such as 40..70, or a group: simple (score ≤30) | medium (35–65) | complex (≥70); the five level names very_simple, simple, moderate, detailed, very_detailed map onto those groups. Detail score is labour per cm², independent of size.",
+                        "example": "40..70"
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "City slug",
+                        "example": "seattle"
+                    },
+                    {
+                        "name": "country",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Country slug or ISO code",
+                        "example": "united-states"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Max items"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Skip items"
+                    },
+                    {
+                        "name": "min_share",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Only tattoos where each requested style/subject takes at least this share (0–100) of the picture, by TatSeek’s composition estimate (estimated_visual_share). Tattoos without a composition are left out when this is used.",
+                        "example": "60"
+                    },
+                    {
+                        "name": "min_conf",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "With min_share: minimum confidence of that estimate — sure (the API prints high and medium as sure), likely (any) or high (strictest).",
+                        "example": "sure"
+                    },
+                    {
+                        "name": "healed",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = only tattoos photographed healed (set only with evidence)",
+                        "example": "1"
+                    },
+                    {
+                        "name": "coverup",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = only cover-ups of an older tattoo or scar",
+                        "example": "1"
+                    },
+                    {
+                        "name": "mood",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Mood slug: cute, funny, romantic, delicate (shown as Tender), peaceful, spiritual, dark, fierce, melancholic (see /vocabulary); tender works too",
+                        "example": "dark"
+                    },
+                    {
+                        "name": "structure",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Vision Scan 4.4: how the ink is laid — solid | shaded | line | lettering | scattered (scanned photos; older ones derived from fill, line and lettering)",
+                        "example": "line"
+                    },
+                    {
+                        "name": "coverage",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Large-format kind — band | spine_piece | half_sleeve | full_sleeve | back_piece | chest_piece | patchwork | full_body",
+                        "example": "full_sleeve"
+                    },
+                    {
+                        "name": "look",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Visual weight of the design — very_delicate | delicate | medium | heavy | very_heavy (delicate includes very_delicate, heavy includes very_heavy), or a 0–100 score range such as 0..40. Never about the wearer.",
+                        "example": "delicate"
+                    },
+                    {
+                        "name": "density",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "How much is going on — minimal | sparse | moderate | dense | very_dense (sparse includes minimal, dense includes very_dense), or a 0–100 range",
+                        "example": "sparse"
+                    },
+                    {
+                        "name": "colourful",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Share of colour ink — none | accents | partial | mostly | full, or a 0–100 range (photos with a scanned palette)",
+                        "example": "accents"
+                    },
+                    {
+                        "name": "realism",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "How realistic the rendering is — graphic | stylised | illustrative | realistic | photoreal, or a 0–100 range (Vision Scan 4.4 re-scans only; empty until then)",
+                        "example": "realistic"
+                    },
+                    {
+                        "name": "effect",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Imitated medium — sticker | embroidery | stained_glass | glitch",
+                        "example": "sticker"
+                    },
+                    {
+                        "name": "intent",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "memorial | matching — only from what the tattoo shows or the artist says; memorial_ideas = motifs often chosen for a memorial piece",
+                        "example": "memorial"
+                    },
+                    {
+                        "name": "one_sitting",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = estimated to fit one session (up to 6 hours)",
+                        "example": "1"
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Language of the lettering (es, la, fr, it, de, pt, he, ar, el, ru, hi, sa, ko, zh, ja, en)",
+                        "example": "la"
+                    },
+                    {
+                        "name": "entity",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A depicted character, person, place or artwork: its Wikidata id (Q366957 = Jason Voorhees) as given in entities[].wikidata_id; tattoos_url there is the same list on the site",
+                        "example": "Q366957"
+                    },
+                    {
+                        "name": "made_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "photo | design | any — only tattoos published next to the reference they were made from",
+                        "example": "photo"
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "One tattoo photo by its id",
+                        "example": "14334"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON"
+                    }
+                }
+            }
+        },
+        "/artists": {
+            "get": {
+                "summary": "Artists ranked by name, then by how many of their tagged tattoos match. budget = max medium-piece price. artist= returns one artist.",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Free text in plain English — understood against the closed vocabulary, typos corrected.",
+                        "example": "fine line rose on the forearm"
+                    },
+                    {
+                        "name": "style",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Style slug (see /vocabulary)",
+                        "example": "realism"
+                    },
+                    {
+                        "name": "subject",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Subject slug",
+                        "example": "wolf"
+                    },
+                    {
+                        "name": "placement",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Placement slug",
+                        "example": "forearm"
+                    },
+                    {
+                        "name": "color",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Colour slug",
+                        "example": "black-and-grey"
+                    },
+                    {
+                        "name": "technique",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Technique slug",
+                        "example": "dotwork"
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "small | medium | large | sleeve"
+                    },
+                    {
+                        "name": "ink",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Ink colour: red | orange | yellow | green | blue | purple | pink | brown | white (TatSeek Vision Scan v4 palette)",
+                        "example": "red"
+                    },
+                    {
+                        "name": "detail",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A 0–100 score range such as 40..70, or a group: simple (score ≤30) | medium (35–65) | complex (≥70); the five level names very_simple, simple, moderate, detailed, very_detailed map onto those groups. Detail score is labour per cm², independent of size.",
+                        "example": "40..70"
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "City slug",
+                        "example": "seattle"
+                    },
+                    {
+                        "name": "country",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Country slug or ISO code",
+                        "example": "united-states"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Max items"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Skip items"
+                    },
+                    {
+                        "name": "min_share",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Only tattoos where each requested style/subject takes at least this share (0–100) of the picture, by TatSeek’s composition estimate (estimated_visual_share). Tattoos without a composition are left out when this is used.",
+                        "example": "60"
+                    },
+                    {
+                        "name": "min_conf",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "With min_share: minimum confidence of that estimate — sure (the API prints high and medium as sure), likely (any) or high (strictest).",
+                        "example": "sure"
+                    },
+                    {
+                        "name": "healed",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = only tattoos photographed healed (set only with evidence)",
+                        "example": "1"
+                    },
+                    {
+                        "name": "coverup",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = only cover-ups of an older tattoo or scar",
+                        "example": "1"
+                    },
+                    {
+                        "name": "mood",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Mood slug: cute, funny, romantic, delicate (shown as Tender), peaceful, spiritual, dark, fierce, melancholic (see /vocabulary); tender works too",
+                        "example": "dark"
+                    },
+                    {
+                        "name": "structure",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Vision Scan 4.4: how the ink is laid — solid | shaded | line | lettering | scattered (scanned photos; older ones derived from fill, line and lettering)",
+                        "example": "line"
+                    },
+                    {
+                        "name": "coverage",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Large-format kind — band | spine_piece | half_sleeve | full_sleeve | back_piece | chest_piece | patchwork | full_body",
+                        "example": "full_sleeve"
+                    },
+                    {
+                        "name": "look",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Visual weight of the design — very_delicate | delicate | medium | heavy | very_heavy (delicate includes very_delicate, heavy includes very_heavy), or a 0–100 score range such as 0..40. Never about the wearer.",
+                        "example": "delicate"
+                    },
+                    {
+                        "name": "density",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "How much is going on — minimal | sparse | moderate | dense | very_dense (sparse includes minimal, dense includes very_dense), or a 0–100 range",
+                        "example": "sparse"
+                    },
+                    {
+                        "name": "colourful",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Share of colour ink — none | accents | partial | mostly | full, or a 0–100 range (photos with a scanned palette)",
+                        "example": "accents"
+                    },
+                    {
+                        "name": "realism",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "How realistic the rendering is — graphic | stylised | illustrative | realistic | photoreal, or a 0–100 range (Vision Scan 4.4 re-scans only; empty until then)",
+                        "example": "realistic"
+                    },
+                    {
+                        "name": "effect",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Imitated medium — sticker | embroidery | stained_glass | glitch",
+                        "example": "sticker"
+                    },
+                    {
+                        "name": "intent",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "memorial | matching — only from what the tattoo shows or the artist says; memorial_ideas = motifs often chosen for a memorial piece",
+                        "example": "memorial"
+                    },
+                    {
+                        "name": "one_sitting",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = estimated to fit one session (up to 6 hours)",
+                        "example": "1"
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Language of the lettering (es, la, fr, it, de, pt, he, ar, el, ru, hi, sa, ko, zh, ja, en)",
+                        "example": "la"
+                    },
+                    {
+                        "name": "entity",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A depicted character, person, place or artwork: its Wikidata id (Q366957 = Jason Voorhees) as given in entities[].wikidata_id; tattoos_url there is the same list on the site",
+                        "example": "Q366957"
+                    },
+                    {
+                        "name": "made_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "photo | design | any — only tattoos published next to the reference they were made from",
+                        "example": "photo"
+                    },
+                    {
+                        "name": "budget",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Artists whose medium-piece price starts at or below this amount, in the studio currency (the q phrase “under $X” is different: it keeps tattoos whose own estimate ends at or below X, in USD)"
+                    },
+                    {
+                        "name": "artist",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "One artist by slug or id",
+                        "example": "angie"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON"
+                    }
+                }
+            }
+        },
+        "/studios": {
+            "get": {
+                "summary": "Studios by name, work, place or feature (put features such as “walk-ins” in q). studio= returns one studio.",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Free text in plain English — understood against the closed vocabulary, typos corrected.",
+                        "example": "fine line rose on the forearm"
+                    },
+                    {
+                        "name": "style",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Style slug (see /vocabulary)",
+                        "example": "realism"
+                    },
+                    {
+                        "name": "subject",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Subject slug",
+                        "example": "wolf"
+                    },
+                    {
+                        "name": "placement",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Placement slug",
+                        "example": "forearm"
+                    },
+                    {
+                        "name": "color",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Colour slug",
+                        "example": "black-and-grey"
+                    },
+                    {
+                        "name": "technique",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Technique slug",
+                        "example": "dotwork"
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "small | medium | large | sleeve"
+                    },
+                    {
+                        "name": "ink",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Ink colour: red | orange | yellow | green | blue | purple | pink | brown | white (TatSeek Vision Scan v4 palette)",
+                        "example": "red"
+                    },
+                    {
+                        "name": "detail",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A 0–100 score range such as 40..70, or a group: simple (score ≤30) | medium (35–65) | complex (≥70); the five level names very_simple, simple, moderate, detailed, very_detailed map onto those groups. Detail score is labour per cm², independent of size.",
+                        "example": "40..70"
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "City slug",
+                        "example": "seattle"
+                    },
+                    {
+                        "name": "country",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Country slug or ISO code",
+                        "example": "united-states"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Max items"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Skip items"
+                    },
+                    {
+                        "name": "min_share",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Only tattoos where each requested style/subject takes at least this share (0–100) of the picture, by TatSeek’s composition estimate (estimated_visual_share). Tattoos without a composition are left out when this is used.",
+                        "example": "60"
+                    },
+                    {
+                        "name": "min_conf",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "With min_share: minimum confidence of that estimate — sure (the API prints high and medium as sure), likely (any) or high (strictest).",
+                        "example": "sure"
+                    },
+                    {
+                        "name": "healed",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = only tattoos photographed healed (set only with evidence)",
+                        "example": "1"
+                    },
+                    {
+                        "name": "coverup",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = only cover-ups of an older tattoo or scar",
+                        "example": "1"
+                    },
+                    {
+                        "name": "mood",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Mood slug: cute, funny, romantic, delicate (shown as Tender), peaceful, spiritual, dark, fierce, melancholic (see /vocabulary); tender works too",
+                        "example": "dark"
+                    },
+                    {
+                        "name": "structure",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Vision Scan 4.4: how the ink is laid — solid | shaded | line | lettering | scattered (scanned photos; older ones derived from fill, line and lettering)",
+                        "example": "line"
+                    },
+                    {
+                        "name": "coverage",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Large-format kind — band | spine_piece | half_sleeve | full_sleeve | back_piece | chest_piece | patchwork | full_body",
+                        "example": "full_sleeve"
+                    },
+                    {
+                        "name": "look",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Visual weight of the design — very_delicate | delicate | medium | heavy | very_heavy (delicate includes very_delicate, heavy includes very_heavy), or a 0–100 score range such as 0..40. Never about the wearer.",
+                        "example": "delicate"
+                    },
+                    {
+                        "name": "density",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "How much is going on — minimal | sparse | moderate | dense | very_dense (sparse includes minimal, dense includes very_dense), or a 0–100 range",
+                        "example": "sparse"
+                    },
+                    {
+                        "name": "colourful",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Share of colour ink — none | accents | partial | mostly | full, or a 0–100 range (photos with a scanned palette)",
+                        "example": "accents"
+                    },
+                    {
+                        "name": "realism",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "How realistic the rendering is — graphic | stylised | illustrative | realistic | photoreal, or a 0–100 range (Vision Scan 4.4 re-scans only; empty until then)",
+                        "example": "realistic"
+                    },
+                    {
+                        "name": "effect",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Imitated medium — sticker | embroidery | stained_glass | glitch",
+                        "example": "sticker"
+                    },
+                    {
+                        "name": "intent",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "memorial | matching — only from what the tattoo shows or the artist says; memorial_ideas = motifs often chosen for a memorial piece",
+                        "example": "memorial"
+                    },
+                    {
+                        "name": "one_sitting",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1 = estimated to fit one session (up to 6 hours)",
+                        "example": "1"
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Language of the lettering (es, la, fr, it, de, pt, he, ar, el, ru, hi, sa, ko, zh, ja, en)",
+                        "example": "la"
+                    },
+                    {
+                        "name": "entity",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A depicted character, person, place or artwork: its Wikidata id (Q366957 = Jason Voorhees) as given in entities[].wikidata_id; tattoos_url there is the same list on the site",
+                        "example": "Q366957"
+                    },
+                    {
+                        "name": "made_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "photo | design | any — only tattoos published next to the reference they were made from",
+                        "example": "photo"
+                    },
+                    {
+                        "name": "studio",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "One studio by its slug (as in /tattoo-studio/{slug}/) or id",
+                        "example": "kakluckytattoos"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON"
+                    }
+                }
+            }
+        },
+        "/guides": {
+            "get": {
+                "summary": "Guide sections that answer a question.",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Question",
+                        "example": "can i swim after a tattoo"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON"
+                    }
+                }
+            }
+        },
+        "/vocabulary": {
+            "get": {
+                "summary": "All valid filter values (styles, subjects, placements, colours, techniques, sizes, cities, studio features).",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "JSON"
+                    }
+                }
+            }
+        },
+        "/stats": {
+            "get": {
+                "summary": "Exact live counts and the rounded public numbers.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "JSON"
+                    }
+                }
+            }
+        }
+    }
+}
